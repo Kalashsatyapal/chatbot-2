@@ -4,21 +4,21 @@ const axios = require("axios");
 const cors = require("cors");
 
 const app = express();
-app.use(cors()); // Fixes CORS issues
+app.use(cors());
 app.use(express.json());
 
 const API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL_ID = "mistralai/mistral-small-3.1-24b-instruct:free"; // ✅ Correct model
 
-// 🔹 API Key Validation Route
+// 🔹 Test API Key
 app.get("/test-api", async (req, res) => {
   try {
     const response = await axios.post(
       OPENROUTER_URL,
       {
         model: MODEL_ID,
-        messages: [{ role: "user", content: "Hello, OpenRouter!" }],
+        messages: [{ role: "user", content: "Hello" }],
       },
       {
         headers: {
@@ -30,8 +30,7 @@ app.get("/test-api", async (req, res) => {
 
     return res.json({ message: "✅ API Key is valid!" });
   } catch (error) {
-    console.error("❌ OpenRouter API Test Failed:", error?.response?.data || error.message);
-
+    console.error("❌ API Test Failed:", error?.response?.data || error.message);
     return res.status(500).json({
       error: "❌ API Key is invalid or OpenRouter is down.",
       details: error?.response?.data || "No response from OpenRouter.",
@@ -69,7 +68,6 @@ app.post("/chat", async (req, res) => {
     }
   } catch (error) {
     console.error("❌ OpenRouter API Error:", error?.response?.data || error.message);
-
     return res.status(500).json({
       error: "❌ Failed to get AI response.",
       details: error?.response?.data || "No response from OpenRouter.",
