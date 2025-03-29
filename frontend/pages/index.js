@@ -23,8 +23,8 @@ export default function Home() {
   
       const data = await res.json();
   
-      if (data.choices && data.choices.length > 0) {
-        setResponse(data.choices[0].message.content); // ✅ Fix response format
+      if (data.answer) { // ✅ Fix response format
+        setResponse(data.answer);
       } else {
         setResponse("❌ No response from AI.");
       }

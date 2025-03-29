@@ -9,6 +9,7 @@ app.use(express.json());
 
 const API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODEL_ID = "mistralai/mistral-small-3.1-24b-instruct:free"; // ✅ Correct model
 
 // 🔹 API Key Validation Route
 app.get("/test-api", async (req, res) => {
@@ -16,7 +17,7 @@ app.get("/test-api", async (req, res) => {
     const response = await axios.post(
       OPENROUTER_URL,
       {
-        model: "mistralai/mistral-7b",
+        model: MODEL_ID,
         messages: [{ role: "user", content: "Hello, OpenRouter!" }],
       },
       {
@@ -50,7 +51,7 @@ app.post("/chat", async (req, res) => {
     const response = await axios.post(
       OPENROUTER_URL,
       {
-        model: "mistralai/mistral-7b",
+        model: MODEL_ID,
         messages: [{ role: "user", content: message }],
       },
       {
@@ -75,6 +76,7 @@ app.post("/chat", async (req, res) => {
     });
   }
 });
+
 // Start Server
 const PORT = 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
