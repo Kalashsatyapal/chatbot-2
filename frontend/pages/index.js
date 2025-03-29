@@ -11,17 +11,26 @@ export default function Home() {
     setResponse("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/chat", {
+      const res = await fetch("http://localhost:5000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ message: question }),
       });
 
+      if (!res.ok) {
+        throw new Error("Server error. Please try again.");
+      }
+  
       const data = await res.json();
-      setResponse(data.answer);
+  
+      if (data.choices && data.choices.length > 0) {
+        setResponse(data.choices[0].message.content); // ✅ Fix response format
+      } else {
+        setResponse("❌ No response from AI.");
+      }
     } catch (error) {
       console.error("Error fetching response:", error);
-      setResponse("Error: Unable to get response.");
+      setResponse("❌ Error: Unable to get response.");
     } finally {
       setLoading(false);
     }
