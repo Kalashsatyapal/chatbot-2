@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { FaBars, FaTimes, FaSignOutAlt, FaTrashAlt, FaPlus } from "react-icons/fa";
 import Auth from "../components/Auth";
 
 export default function Home() {
@@ -8,7 +9,7 @@ export default function Home() {
   const [chatHistory, setChatHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Controls sidebar visibility
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeChat, setActiveChat] = useState(null);
 
   useEffect(() => {
@@ -94,6 +95,29 @@ export default function Home() {
     setUser(null);
   };
 
+  const deleteChatHistory = async (chatId) => {
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/delete-chat`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ chat_id: chatId }),
+      }
+    );
+
+    const data = await res.json();
+    if (data.success) {
+      setChatHistory(chatHistory.filter((chat) => chat.id !== chatId));
+      if (activeChat === chatId) setActiveChat(null);
+    } else {
+      setError(data.error || "Failed to delete chat.");
+    }
+  };
+
   if (!user) return <Auth onAuthSuccess={setUser} />;
 
   return (
@@ -101,7 +125,7 @@ export default function Home() {
       {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 w-64 bg-gray-200 p-4 transition-all duration-300 ease-in-out transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          sidebarOpen ? "translate-x-0" : "-translate-x-64"
         } sm:relative sm:translate-x-0`}
       >
         <div className="flex justify-between items-center mb-4">
@@ -110,7 +134,7 @@ export default function Home() {
             onClick={() => setSidebarOpen(false)}
             className="bg-red-500 text-white p-1 rounded sm:hidden"
           >
-            Close
+            <FaTimes />
           </button>
         </div>
         <ul>
@@ -126,6 +150,15 @@ export default function Home() {
               }}
             >
               {chat.title}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteChatHistory(chat.id);
+                }}
+                className="bg-red-500 text-white text-sm ml-2 p-1 rounded"
+              >
+                <FaTrashAlt />
+              </button>
             </li>
           ))}
         </ul>
@@ -139,7 +172,7 @@ export default function Home() {
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="bg-gray-500 text-white p-2 rounded"
           >
-            {sidebarOpen ? "Close Sidebar" : "Open Sidebar"}
+            {sidebarOpen ? <FaTimes /> : <FaBars />}
           </button>
           <h1 className="text-2xl font-bold">ChatNova</h1>
           <div>
@@ -150,18 +183,18 @@ export default function Home() {
               }}
               className="bg-green-500 text-white p-2 rounded mr-2"
             >
-              New Chat
+              <FaPlus />
             </button>
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white p-2 rounded"
             >
-              Logout
+              <FaSignOutAlt />
             </button>
           </div>
         </div>
 
-        <div className="border p-4 rounded h-80 overflow-auto bg-gray-100 mb-4">
+        <div className="border p-4 rounded h-150 overflow-auto bg-gray-100 mb-4">
           {activeChat &&
           chatHistory.find((chat) => chat.id === activeChat)?.messages
             .length ? (
@@ -169,14 +202,26 @@ export default function Home() {
               .find((chat) => chat.id === activeChat)
               .messages.map((msg, index) => (
                 <div key={index} className="mb-3">
-                  <p className="font-semibold">You:</p>
-                  <p className="bg-white p-2 rounded shadow">
-                    {msg.user_message}
-                  </p>
-                  <p className="font-semibold mt-2">AI:</p>
-                  <p className="bg-blue-100 p-2 rounded shadow">
-                    {msg.ai_response}
-                  </p>
+                  <div className="flex items-start mb-2">
+                    <div className="w-1/6">
+                      <div className="font-semibold text-gray-700">You:</div>
+                    </div>
+                    <div className="w-5/6">
+                      <div className="bg-white p-3 rounded-lg shadow-md text-gray-700">
+                        {msg.user_message}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-start mb-2">
+                    <div className="w-1/6">
+                      <div className="font-semibold text-gray-700">AI:</div>
+                    </div>
+                    <div className="w-5/6">
+                      <div className="bg-blue-200 p-3 rounded-lg shadow-md text-gray-700">
+                        {msg.ai_response}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))
           ) : (

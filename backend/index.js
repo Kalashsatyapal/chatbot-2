@@ -120,6 +120,30 @@ app.get("/chat-history", verifyUser, async (req, res) => {
   }
 });
 
+// 🔹 Delete Chat Route (Requires Authentication)
+app.delete("/delete-chat", verifyUser, async (req, res) => {
+  const { chat_id } = req.body;
+  const userId = req.user.id;
+
+  if (!chat_id) return res.status(400).json({ error: "❌ Chat ID is required." });
+
+  try {
+    // Delete the chat from Supabase
+    const { data, error } = await supabase
+      .from("chats")
+      .delete()
+      .eq("id", chat_id)
+      .eq("user_id", userId);
+
+    if (error) throw new Error(error.message);
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("❌ Delete Chat Error:", error.message);
+    return res.status(500).json({ error: "❌ Failed to delete chat." });
+  }
+});
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
