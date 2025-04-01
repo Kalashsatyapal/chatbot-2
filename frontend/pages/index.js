@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { FaBars, FaTimes, FaSignOutAlt, FaTrashAlt, FaPlus } from "react-icons/fa";
 import Auth from "../components/Auth";
+import io from 'socket.io-client';
+
+const socket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}`);
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -28,6 +31,28 @@ export default function Home() {
     return () => listener?.subscription?.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (user) fetchChatHistory();
+  }, [user]);
+
+  // Listen for new messages from WebSocket
+  useEffect(() => {
+    socket.on('new_message', (messageData) => {
+      setChatHistory(prevHistory => {
+        const updatedHistory = [...prevHistory];
+        const chat = updatedHistory.find(chat => chat.id === messageData.chat_id);
+        if (chat) {
+          chat.messages.push({ user_message: messageData.message, ai_response: messageData.ai_response });
+        }
+        return updatedHistory;
+      });
+    });
+
+    return () => {
+      socket.off('new_message');
+    };
+  }, []);
+
   const fetchChatHistory = async () => {
     if (!user) return;
 
@@ -42,10 +67,6 @@ export default function Home() {
     const data = await res.json();
     if (data.history) setChatHistory(data.history);
   };
-
-  useEffect(() => {
-    if (user) fetchChatHistory();
-  }, [user]);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -87,6 +108,13 @@ export default function Home() {
         setActiveChat(data.chat_id);
       }
       setMessage("");
+
+      // Emit message to the backend via WebSocket
+      socket.emit('send_message', {
+        message,
+        ai_response: data.answer,
+        chat_id: data.chat_id,
+      });
     }
   };
 
