@@ -146,6 +146,14 @@ export default function Home() {
     }
   };
 
+  const formatAIResponse = (response) => {
+    // Split the response by punctuation marks (period, exclamation mark, and question mark)
+    const sentences = response.split(/(?<=[.!?])\s+/);
+    return sentences.map((sentence, index) => (
+      <p key={index}>{sentence}</p>
+    ));
+  };
+
   if (!user) return <Auth onAuthSuccess={setUser} />;
 
   return (
@@ -246,7 +254,7 @@ export default function Home() {
                     </div>
                     <div className="w-5/6">
                       <div className="bg-blue-200 p-3 rounded-lg shadow-md text-gray-700">
-                        {msg.ai_response}
+                        {formatAIResponse(msg.ai_response)}
                       </div>
                     </div>
                   </div>
@@ -265,14 +273,14 @@ export default function Home() {
             className="flex-1 p-2 border rounded"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message..."
+            placeholder="Type your message..."
           />
           <button
             onClick={sendMessage}
-            className="bg-blue-500 text-white p-2 ml-2 rounded"
+            className="bg-blue-500 text-white p-2 rounded ml-2"
             disabled={loading}
           >
-            {loading ? "..." : "Send"}
+            {loading ? "Sending..." : "Send"}
           </button>
         </div>
       </div>
