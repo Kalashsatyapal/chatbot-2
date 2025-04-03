@@ -1,15 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import {
-  FaPaperPlane,
-  FaBars,
-  FaTimes,
-  FaSignOutAlt,
-  FaTrashAlt,
-  FaPlus,
-  FaSun,
-  FaMoon,
-} from "react-icons/fa";
+import {FaPaperPlane,FaTimes,FaSignOutAlt,FaTrashAlt,FaPlus,FaSun,FaMoon,} from "react-icons/fa";
 import Auth from "../components/Auth";
 import io from "socket.io-client";
 
@@ -24,10 +15,10 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeChat, setActiveChat] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
-useEffect(() => {
-  const storedDarkMode = localStorage.getItem("darkMode");
-  setDarkMode(storedDarkMode ? storedDarkMode === "true" : false);
-}, []);
+  useEffect(() => {
+    const storedDarkMode = localStorage.getItem("darkMode");
+    setDarkMode(storedDarkMode ? storedDarkMode === "true" : false);
+  }, []);
 
   const toggleDarkMode = () => {
     setDarkMode((prevMode) => {
@@ -191,12 +182,13 @@ useEffect(() => {
       <div
         className={`fixed inset-y-0 left-0 w-64 p-4 transition-all duration-300 ease-in-out transform ${
           darkMode ? "bg-black text-white" : "bg-gray-200 text-black"
-        } ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-64 hidden"
         } sm:relative sm:translate-x-0 sm:block`}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Chat History</h2>
+          <h1 className="text-lg font-extrabold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent tracking-wider uppercase border-b-2 border-blue-500 pb-1 animate-pulse">
+            Chat History
+          </h1>
+
           <button
             onClick={() => setSidebarOpen(false)}
             className="bg-red-500 text-white p-1 rounded sm:hidden"
@@ -232,31 +224,16 @@ useEffect(() => {
         </ul>
       </div>
 
-      {/* Sidebar Open Button (Only Visible When Sidebar is Closed) */}
-      {!sidebarOpen && (
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="fixed top-4 left-4 p-2 rounded text-white bg-gray-500 sm:hidden"
-        >
-          <FaBars size={20} />
-        </button>
-      )}
-
       {/* Main Chat Area */}
       <div className="flex-1 p-4">
-        <div className="flex justify-between items-center mb-4">
-          {/* Button to toggle sidebar */}
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded text-white bg-gray-500"
-          >
-            {sidebarOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
-          </button>
-          <h1 className="text-2xl font-bold">ChatNova</h1>
+        <div className="flex justify-center items-center mb-4">
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse mx-5">
+            ChatNova
+          </h1>
           <div>
             <button
               onClick={toggleDarkMode}
-              className="p-2 rounded text-white bg-gray-700"
+              className="p-2 rounded text-white bg-gray-700 mx-2"
             >
               {darkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
             </button>
