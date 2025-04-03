@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import {
-  FaBars,
-  FaTimes,
-  FaSignOutAlt,
-  FaTrashAlt,
-  FaPlus,
-} from "react-icons/fa";
+import {FaBars,FaTimes,FaSignOutAlt,FaTrashAlt,FaPlus,} from "react-icons/fa";
 import Auth from "../components/Auth";
 import io from "socket.io-client";
 
