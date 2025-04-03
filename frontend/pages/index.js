@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import {FaBars,FaTimes,FaSignOutAlt,FaTrashAlt,FaPlus,} from "react-icons/fa";
+import {
+  FaPaperPlane,
+  FaBars,
+  FaTimes,
+  FaSignOutAlt,
+  FaTrashAlt,
+  FaPlus,
+  FaSun,
+  FaMoon,
+} from "react-icons/fa";
 import Auth from "../components/Auth";
 import io from "socket.io-client";
 
@@ -14,13 +23,19 @@ export default function Home() {
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeChat, setActiveChat] = useState(null);
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("darkMode") === "true";
-  });
+  const [darkMode, setDarkMode] = useState(false);
+useEffect(() => {
+  const storedDarkMode = localStorage.getItem("darkMode");
+  setDarkMode(storedDarkMode ? storedDarkMode === "true" : false);
+}, []);
 
-  useEffect(() => {
-    localStorage.setItem("darkMode", darkMode);
-  }, [darkMode]);
+  const toggleDarkMode = () => {
+    setDarkMode((prevMode) => {
+      const newMode = !prevMode;
+      localStorage.setItem("darkMode", newMode);
+      return newMode;
+    });
+  };
 
   useEffect(() => {
     const getSession = async () => {
@@ -177,8 +192,8 @@ export default function Home() {
         className={`fixed inset-y-0 left-0 w-64 p-4 transition-all duration-300 ease-in-out transform ${
           darkMode ? "bg-black text-white" : "bg-gray-200 text-black"
         } ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-64"
-        } sm:relative sm:translate-x-0`}
+          sidebarOpen ? "translate-x-0" : "-translate-x-64 hidden"
+        } sm:relative sm:translate-x-0 sm:block`}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Chat History</h2>
@@ -189,6 +204,7 @@ export default function Home() {
             <FaTimes />
           </button>
         </div>
+
         <ul>
           {chatHistory.map((chat) => (
             <li
@@ -207,14 +223,24 @@ export default function Home() {
                   e.stopPropagation();
                   deleteChatHistory(chat.id);
                 }}
-                className="bg-red-500 text-white text-sm ml-2 p-1 rounded"
+                className="p-1 rounded text-white bg-red-500 mx-2"
               >
-                <FaTrashAlt />
+                <FaTrashAlt size={16} />
               </button>
             </li>
           ))}
         </ul>
       </div>
+
+      {/* Sidebar Open Button (Only Visible When Sidebar is Closed) */}
+      {!sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="fixed top-4 left-4 p-2 rounded text-white bg-gray-500 sm:hidden"
+        >
+          <FaBars size={20} />
+        </button>
+      )}
 
       {/* Main Chat Area */}
       <div className="flex-1 p-4">
@@ -222,32 +248,33 @@ export default function Home() {
           {/* Button to toggle sidebar */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="bg-gray-500 text-white p-2 rounded"
+            className="p-2 rounded text-white bg-gray-500"
           >
-            {sidebarOpen ? <FaTimes /> : <FaBars />}
+            {sidebarOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
           </button>
           <h1 className="text-2xl font-bold">ChatNova</h1>
           <div>
             <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="bg-gray-700 text-white p-2 rounded mr-2"
+              onClick={toggleDarkMode}
+              className="p-2 rounded text-white bg-gray-700"
             >
-              {darkMode ? "Light Mode" : "Dark Mode"}
+              {darkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
             </button>
+
             <button
               onClick={() => {
                 setChatHistory([]);
                 setActiveChat(null);
               }}
-              className="bg-green-500 text-white p-2 rounded mr-2"
+              className="p-2 rounded text-white bg-green-500 mx-2"
             >
-              <FaPlus />
+              <FaPlus size={20} />
             </button>
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white p-2 rounded"
+              className="p-2 rounded text-white bg-red-500 mx-2"
             >
-              <FaSignOutAlt />
+              <FaSignOutAlt size={20} />
             </button>
           </div>
         </div>
@@ -270,8 +297,10 @@ export default function Home() {
                     </div>
                     <div className="w-5/6">
                       <div
-                        className={`bg-white p-3 rounded-lg shadow-md ${
-                          darkMode ? "bg-gray-700 text-white" : "text-gray-700"
+                        className={`p-3 rounded-lg shadow-md ${
+                          darkMode
+                            ? "bg-gray-700 text-yellow-400"
+                            : "bg-white text-gray-700"
                         }`}
                       >
                         {msg.user_message}
@@ -313,10 +342,10 @@ export default function Home() {
           />
           <button
             onClick={sendMessage}
-            className="bg-blue-500 text-white p-2 rounded ml-2"
+            className="p-2 rounded text-white bg-blue-500 ml-2"
             disabled={loading}
           >
-            {loading ? "Sending..." : "Send"}
+            {loading ? "..." : <FaPaperPlane size={20} />}
           </button>
         </div>
       </div>
