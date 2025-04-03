@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import { FaBars, FaTimes, FaSignOutAlt, FaTrashAlt, FaPlus } from "react-icons/fa";
+import {
+  FaBars,
+  FaTimes,
+  FaSignOutAlt,
+  FaTrashAlt,
+  FaPlus,
+} from "react-icons/fa";
 import Auth from "../components/Auth";
-import io from 'socket.io-client';
+import io from "socket.io-client";
 
 const socket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}`);
 
@@ -14,6 +20,13 @@ export default function Home() {
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeChat, setActiveChat] = useState(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("darkMode") === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", darkMode);
+  }, [darkMode]);
 
   useEffect(() => {
     const getSession = async () => {
@@ -37,19 +50,24 @@ export default function Home() {
 
   // Listen for new messages from WebSocket
   useEffect(() => {
-    socket.on('new_message', (messageData) => {
-      setChatHistory(prevHistory => {
+    socket.on("new_message", (messageData) => {
+      setChatHistory((prevHistory) => {
         const updatedHistory = [...prevHistory];
-        const chat = updatedHistory.find(chat => chat.id === messageData.chat_id);
+        const chat = updatedHistory.find(
+          (chat) => chat.id === messageData.chat_id
+        );
         if (chat) {
-          chat.messages.push({ user_message: messageData.message, ai_response: messageData.ai_response });
+          chat.messages.push({
+            user_message: messageData.message,
+            ai_response: messageData.ai_response,
+          });
         }
         return updatedHistory;
       });
     });
 
     return () => {
-      socket.off('new_message');
+      socket.off("new_message");
     };
   }, []);
 
@@ -110,7 +128,7 @@ export default function Home() {
       setMessage("");
 
       // Emit message to the backend via WebSocket
-      socket.emit('send_message', {
+      socket.emit("send_message", {
         message,
         ai_response: data.answer,
         chat_id: data.chat_id,
@@ -149,15 +167,17 @@ export default function Home() {
   const formatAIResponse = (response) => {
     // Split the response by punctuation marks (period, exclamation mark, and question mark)
     const sentences = response.split(/(?<=[.!?])\s+/);
-    return sentences.map((sentence, index) => (
-      <p key={index}>{sentence}</p>
-    ));
+    return sentences.map((sentence, index) => <p key={index}>{sentence}</p>);
   };
 
   if (!user) return <Auth onAuthSuccess={setUser} />;
 
   return (
-    <div className="flex h-screen">
+    <div
+      className={`flex h-screen ${
+        darkMode ? "bg-gray-900 text-white" : "bg-white text-black"
+      }`}
+    >
       {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 w-64 bg-gray-200 p-4 transition-all duration-300 ease-in-out transform ${
@@ -213,6 +233,12 @@ export default function Home() {
           <h1 className="text-2xl font-bold">ChatNova</h1>
           <div>
             <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="bg-gray-700 text-white p-2 rounded mr-2"
+            >
+              {darkMode ? "Light Mode" : "Dark Mode"}
+            </button>
+            <button
               onClick={() => {
                 setChatHistory([]);
                 setActiveChat(null);
@@ -230,7 +256,11 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="border p-4 rounded h-150 overflow-auto bg-gray-100 mb-4">
+        <div
+          className={`border p-4 rounded h-150 overflow-auto ${
+            darkMode ? "bg-gray-800" : "bg-gray-100"
+          } mb-4`}
+        >
           {activeChat &&
           chatHistory.find((chat) => chat.id === activeChat)?.messages
             .length ? (
@@ -243,7 +273,11 @@ export default function Home() {
                       <div className="font-semibold text-gray-700">You:</div>
                     </div>
                     <div className="w-5/6">
-                      <div className="bg-white p-3 rounded-lg shadow-md text-gray-700">
+                      <div
+                        className={`bg-white p-3 rounded-lg shadow-md ${
+                          darkMode ? "bg-gray-700 text-white" : "text-gray-700"
+                        }`}
+                      >
                         {msg.user_message}
                       </div>
                     </div>
@@ -253,7 +287,11 @@ export default function Home() {
                       <div className="font-semibold text-gray-700">AI:</div>
                     </div>
                     <div className="w-5/6">
-                      <div className="bg-blue-200 p-3 rounded-lg shadow-md text-gray-700">
+                      <div
+                        className={`bg-blue-200 p-3 rounded-lg shadow-md ${
+                          darkMode ? "bg-blue-500 text-white" : "text-gray-700"
+                        }`}
+                      >
                         {formatAIResponse(msg.ai_response)}
                       </div>
                     </div>
@@ -270,7 +308,9 @@ export default function Home() {
         <div className="flex">
           <input
             type="text"
-            className="flex-1 p-2 border rounded"
+            className={`flex-1 p-2 border rounded ${
+              darkMode ? "bg-gray-800 text-white border-gray-600" : ""
+            }`}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type your message..."
