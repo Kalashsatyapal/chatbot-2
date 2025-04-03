@@ -12,7 +12,6 @@ export default function Home() {
   const [chatHistory, setChatHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeChat, setActiveChat] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   useEffect(() => {
@@ -189,12 +188,6 @@ export default function Home() {
             Chat History
           </h1>
 
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="bg-red-500 text-white p-1 rounded sm:hidden"
-          >
-            <FaTimes />
-          </button>
         </div>
 
         <ul>
@@ -206,7 +199,6 @@ export default function Home() {
               }`}
               onClick={() => {
                 setActiveChat(chat.id);
-                setSidebarOpen(false); // Close sidebar when a chat is selected
               }}
             >
               {chat.title}
