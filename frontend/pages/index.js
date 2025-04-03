@@ -180,7 +180,9 @@ export default function Home() {
     >
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-gray-200 p-4 transition-all duration-300 ease-in-out transform ${
+        className={`fixed inset-y-0 left-0 w-64 p-4 transition-all duration-300 ease-in-out transform ${
+          darkMode ? "bg-black text-white" : "bg-gray-200 text-black"
+        } ${
           sidebarOpen ? "translate-x-0" : "-translate-x-64"
         } sm:relative sm:translate-x-0`}
       >
