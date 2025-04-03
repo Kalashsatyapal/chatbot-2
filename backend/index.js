@@ -144,6 +144,28 @@ app.delete("/delete-chat", verifyUser, async (req, res) => {
   }
 });
 
+// rate ai responses
+app.post("/rate-response", async (req, res) => {
+  const { chat_id, rating, user_id } = req.body;
+
+  if (!chat_id || !rating || !user_id) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("ai_ratings")
+      .insert([{ chat_id, rating, user_id }]);
+
+    if (error) throw error;
+
+    res.status(200).json({ success: true, message: "Rating saved successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

@@ -1,8 +1,16 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import {FaPaperPlane,FaTimes,FaSignOutAlt,FaTrashAlt,FaPlus,FaSun,FaMoon,} from "react-icons/fa";
+import {
+  FaPaperPlane,
+  FaSignOutAlt,
+  FaTrashAlt,
+  FaPlus,
+  FaSun,
+  FaMoon,
+} from "react-icons/fa";
 import Auth from "../components/Auth";
 import io from "socket.io-client";
+import Rating from "../components/Rating";
 
 const socket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}`);
 
@@ -163,6 +171,23 @@ export default function Home() {
     }
   };
 
+  const handleRating = async (chatId, messageIndex, rating) => {
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/save-rating`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        message_index: messageIndex,
+        rating,
+      }),
+    });
+  };
+
   const formatAIResponse = (response) => {
     // Split the response by punctuation marks (period, exclamation mark, and question mark)
     const sentences = response.split(/(?<=[.!?])\s+/);
@@ -187,7 +212,6 @@ export default function Home() {
           <h1 className="text-lg font-extrabold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent tracking-wider uppercase border-b-2 border-blue-500 pb-1 animate-pulse">
             Chat History
           </h1>
-
         </div>
 
         <ul>
@@ -232,8 +256,8 @@ export default function Home() {
 
             <button
               onClick={() => {
-                setChatHistory([]);
-                setActiveChat(null);
+                setActiveChat(null); // Reset active chat
+                setMessage(""); // Clear input field
               }}
               className="p-2 rounded text-white bg-green-500 mx-2"
             >
@@ -287,6 +311,12 @@ export default function Home() {
                         }`}
                       >
                         {formatAIResponse(msg.ai_response)}
+                        {/* Rating Component */}
+                        <Rating
+                          onRate={(value) =>
+                            console.log(`Rated ${value} stars`)
+                          }
+                        />
                       </div>
                     </div>
                   </div>
